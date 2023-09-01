@@ -1,2 +1,3 @@
 #!/bin/bash
+chmod 755 7-everybody
 chmod 755 hello

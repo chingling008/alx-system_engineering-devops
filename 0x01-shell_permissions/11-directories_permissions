@@ -1,3 +1,2 @@
 #!/bin/bash
 chmod -R 011 dir0 dir1 dir2
-

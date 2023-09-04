@@ -1,2 +1,2 @@
 #!/bin/bash
-touch '\*\\'"Best School"\'\\*$\?\*\*\*\*\*:)'<<<'Best School'
+find -mindepth 1 -type d | wc -l

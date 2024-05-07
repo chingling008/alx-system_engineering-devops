@@ -1,4 +1,5 @@
-#!/bin/python3
+#!/usr/bin/python3
+
 import praw
 
 def get_words_from_title(title, word_list, word_counts):
@@ -30,10 +31,11 @@ def count_words(subreddit, word_list, after=None):
   Returns:
     None
   """
- user_agent = "MyCustomScript v1.0 (by your_username)"
+  # Set custom User-Agent (replace with your desired string)
+  user_agent = "MyCustomScript v1.0 (by your_username)"
 
-  reddit = praw.Reddit(client_id="",
-                      client_secret="",
+  reddit = praw.Reddit(client_id="",  # Insert your Reddit client ID here
+                      client_secret="",  # Insert your Reddit client secret here
                       user_agent=user_agent)
 
   subreddit = reddit.subreddit(subreddit)
@@ -54,3 +56,8 @@ def count_words(subreddit, word_list, after=None):
 
   # Recursive case: Fetch more articles and continue processing
   count_words(subreddit, word_list, hot_articles.data.after)
+
+# Example usage (replace with your desired subreddit and keywords)
+subreddit_name = "programming"
+keywords = ["python", "java", "javascript"]
+count_words(subreddit_name, keywords)

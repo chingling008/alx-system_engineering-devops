@@ -26,7 +26,7 @@ def count_words(subreddit, word_list):
     global hotlist
     global after
     """subs"""
-    head = {'User-Agent': 'Dan Kazam'}
+    head = {'User-Agent': 'cizario'}
     if after:
         count = get('https://www.reddit.com/r/{}/hot.json?after={}'.format(
             subreddit, after), headers=head).json().get('data')

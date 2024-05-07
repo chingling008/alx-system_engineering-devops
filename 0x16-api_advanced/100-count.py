@@ -1,63 +1,45 @@
 #!/usr/bin/python3
+# get subs
+from requests import get
+from sys import argv
 
-import praw
+hotlist = []
+after = None
 
-def get_words_from_title(title, word_list, word_counts):
-  """
-  Parses a title for keywords and updates a dictionary with counts.
 
-  Args:
-    title: The title of a Reddit post (str).
-    word_list: A list of keywords to search for (list of str).
-    word_counts: A dictionary to store counts of each keyword (dict of str: int).
+def count_all(hotlist, word_list):
+    count_dic = {word.lower(): 0 for word in word_list}
+    for title in hotlist:
+        words = title.split(' ')
+        for word in words:
+            if count_dic.get(word) is not None:
+                count_dic[word] += 1
 
-  Returns:
-    None
-  """
-  for word in word_list:
-    # Ensure case-insensitive matching and avoid partial matches with punctuation
-    if word.lower() in title.lower() and not (word.lower() + "." in title.lower() or word.lower() + "!" in title.lower() or word.lower() + "_" in title.lower()):
-      word_counts[word.lower()] = word_counts.get(word.lower(), 0) + 1
+    for key in sorted(count_dic, key=count_dic.get, reverse=True):
+        if count_dic.get(key):
+            for thing in word_list:
+                if key == thing.lower():
+                    print("{}: {}".format(thing, count_dic[key]))
 
-def count_words(subreddit, word_list, after=None):
-  """
-  Recursively queries Reddit for hot articles, parses titles, and counts keywords.
 
-  Args:
-    subreddit: The name of the subreddit to query (str).
-    word_list: A list of keywords to search for (list of str).
-    after: A string to specify pagination after a previous request (str, optional).
+def count_words(subreddit, word_list):
+    global hotlist
+    global after
+    """subs"""
+    head = {'User-Agent': 'Dan Kazam'}
+    if after:
+        count = get('https://www.reddit.com/r/{}/hot.json?after={}'.format(
+            subreddit, after), headers=head).json().get('data')
+    else:
+        count = get('https://www.reddit.com/r/{}/hot.json'.format(
+            subreddit), headers=head).json().get('data')
+    hotlist += [dic.get('data').get('title').lower()
+                for dic in count.get('children')]
+    after = count.get('after')
+    if after:
+        return count_words(subreddit, word_list)
+    return count_all(hotlist, word_list)
 
-  Returns:
-    None
-  """
-  # Set custom User-Agent (replace with your desired string)
-  user_agent = "MyCustomScript v1.0 (by your_username)"
 
-  reddit = praw.Reddit(client_id="",  # Insert your Reddit client ID here
-                      client_secret="",  # Insert your Reddit client secret here
-                      user_agent=user_agent)
-
-  subreddit = reddit.subreddit(subreddit)
-  hot_articles = subreddit.hot(limit=100, after=after)
-
-  word_counts = {}
-  for submission in hot_articles:
-    get_words_from_title(submission.title, word_list, word_counts)
-
-  # Base case: No more articles to process
-  if not hot_articles.data.after:
-    # Sort word counts by count (descending) and then alphabetically (ascending)
-    sorted_counts = sorted(word_counts.items(), key=lambda item: (-item[1], item[0]))
-    for word, count in sorted_counts:
-      if count > 0:
-        print(f"{word}: {count}")
-    return
-
-  # Recursive case: Fetch more articles and continue processing
-  count_words(subreddit, word_list, hot_articles.data.after)
-
-# Example usage (replace with your desired subreddit and keywords)
-subreddit_name = "programming"
-keywords = ["python", "java", "javascript"]
-count_words(subreddit_name, keywords)
+if __name__ == "__main__":
+    count_words(argv[1], argv[2].split(' '))
